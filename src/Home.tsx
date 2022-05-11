@@ -1,6 +1,6 @@
 import React from 'react'
-import { Typography, TextField, Stack, Button, Modal, Box } from '@mui/material'
-import Table from './Table'
+import { Typography, TextField, Stack, Button, Modal, Box,
+        Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
 
 const style = {
     position: 'absolute' as 'absolute',
@@ -14,20 +14,36 @@ const style = {
     p: 4,
     };
 
-const Home = () => {
+
+const Home: React.FC = () => {
     const [open, setOpen] = React.useState(false);
-    const [data, setData] = React.useState([])
+    const [errorText, setErrorText] = React.useState<string>('');
+
+    // const [fileModalOpen, setFileModalOpen] = React.useState(false);
+
+
+    const [data, setData] = React.useState<string[]>([]);
+    const [text, setText] = React.useState<string>('');
+    // const [description, setDescription] = React.useState();
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
+    // const handleFileModalOpen = () => setFileModalOpen(true);
+    // const handleFileModalClose = () => setFileModalOpen(false);
+
     const handleSave = () => {
-        // 
+        setData([ ...data, text ]); 
         handleClose();
-    }
+      };
 
     const handleChangeText = (evt: any) => {
-        setData(evt.target.value)
+        const {value} = evt.target;
+        if(!value){
+            setErrorText('Required');
+        }
+        setText(evt.target.value)
     }
+
 
 return(
     <div>
@@ -57,6 +73,7 @@ return(
                     label="Folder Name"
                     variant="outlined" 
                     onChange={handleChangeText}
+                    // TODO validation
                 />
                 <br />
                 <br />
@@ -68,8 +85,34 @@ return(
                 </Button>
             </Box>
         </Modal>
+
+
+
+         <Button
+            variant="outlined"
+            // onClick={handleFileModalOpen}
+            >
+                Create New File
+            </Button>
+
         </Stack>
-        {/* <Table data={data}/> */}
+
+      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Folder</TableCell>
+            <TableCell>Description</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+               <TableRow>
+              <TableCell>{row}</TableCell>
+              <TableCell>Not Available</TableCell> 
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
    
 )
