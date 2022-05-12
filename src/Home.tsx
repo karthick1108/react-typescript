@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@mui/material";
 import FileExplorerModal from "./Modal";
+import FileModal from "./FileModal";
 
 interface Folder {
   type: "folder";
@@ -35,11 +36,15 @@ const Home: React.FC = () => {
   const [name, setName] = React.useState<string>("");
   const [content, setContent] = React.useState<string>("");
 
+  const [fileModal, setFileModal] = React.useState(false);
+  const [fileData, setFileData] = React.useState<FileExplorer>([]);
+
   const handleOpen = (type: FileOrFolder) => {
     setOpen(true);
     setModalType(type);
   };
   const handleClose = () => setOpen(false);
+  const handleFileModalClose = () => setFileModal(false);
 
   const handleSave = () => {
     let newData;
@@ -56,6 +61,15 @@ const Home: React.FC = () => {
 
   const handleDescriptionText = (evt: any) => {
     setContent(evt.target.value);
+  };
+
+  const handleDoubleClick = (rowData: any) => {
+    const { type } = rowData;
+
+    if (type === "file") {
+      setFileModal(true);
+      setFileData(rowData);
+    }
   };
 
   return (
@@ -90,14 +104,13 @@ const Home: React.FC = () => {
         </TableHead>
         <TableBody>
           {data.map((row) => (
-            <TableRow onDoubleClick={() => console.log("clickedn")}>
+            <TableRow onDoubleClick={() => handleDoubleClick(row)}>
               <TableCell>{row.name}</TableCell>
               <TableCell>{row.type}</TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
-
       <FileExplorerModal
         open={open}
         type={modalType}
@@ -105,6 +118,11 @@ const Home: React.FC = () => {
         handleChangeText={handleChangeText}
         handleSave={handleSave}
         handleDescriptionText={handleDescriptionText}
+      />
+      <FileModal
+        fileModal={fileModal}
+        handleFileModalClose={handleFileModalClose}
+        fileData={fileData}
       />
     </div>
   );
