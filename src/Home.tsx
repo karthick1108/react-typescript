@@ -77,6 +77,19 @@ const Home: React.FC = () => {
     }
   };
 
+  const saveLocalData = () => {
+    localStorage.setItem("data", JSON.stringify(data));
+  };
+
+  const getLocalData = () => {
+    if (localStorage.getItem("data") === null) {
+      localStorage.setItem("data", JSON.stringify([]));
+    } else {
+      let dataLocal = JSON.parse(localStorage.getItem("data") || "{}");
+      setData(dataLocal);
+    }
+  };
+
   const filteredData = React.useMemo(() => {
     if (!searchText) {
       return data;
@@ -88,6 +101,21 @@ const Home: React.FC = () => {
 
     return newData;
   }, [searchText, data]);
+
+  const totalCount = () => {
+    const fileCount = filteredData.filter(
+      (element) => element.type === "file"
+    ).length;
+    const folderCount = filteredData.filter(
+      (element) => element.type === "folder"
+    ).length;
+
+    return `${fileCount} file(s) and ${folderCount} folder(s)`;
+  };
+
+  //   React.useEffect(() => {
+  //     saveLocalData();
+  //   }, [data]);
 
   return (
     <div>
@@ -112,7 +140,7 @@ const Home: React.FC = () => {
           Create New File
         </Button>
       </Stack>
-      <Table sx={{ minWidth: 650 }} aria-label="simple table">
+      <Table style={{ marginBottom: "48px" }} aria-label="simple table">
         <TableHead>
           <TableRow>
             <TableCell>Name</TableCell>
@@ -120,7 +148,7 @@ const Home: React.FC = () => {
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredData?.map((row) => (
+          {filteredData.map((row) => (
             <TableRow onDoubleClick={() => handleDoubleClick(row)}>
               <TableCell>{row.name}</TableCell>
               <TableCell>{row.type}</TableCell>
@@ -128,6 +156,13 @@ const Home: React.FC = () => {
           ))}
         </TableBody>
       </Table>
+
+      <div>
+        <Typography style={{ display: "flex", justifyContent: "right" }}>
+          Total: {totalCount()}
+        </Typography>
+      </div>
+
       <FileExplorerModal
         open={open}
         type={modalType}
