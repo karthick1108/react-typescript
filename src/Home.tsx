@@ -1,17 +1,9 @@
 import React from "react";
-import {
-  Typography,
-  TextField,
-  Stack,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-} from "@mui/material";
+import { Typography, TextField, Stack, Button } from "@mui/material";
+import { useHistory } from "react-router-dom";
 import FileExplorerModal from "./Modal";
 import FileModal from "./FileModal";
+import FileExplorerTable from "./Table";
 
 interface Folder {
   type: "folder";
@@ -39,6 +31,8 @@ const Home: React.FC = () => {
 
   const [fileModal, setFileModal] = React.useState(false);
   const [fileData, setFileData] = React.useState<FileExplorer>([]);
+
+  const history = useHistory();
 
   const handleOpen = (type: FileOrFolder) => {
     setOpen(true);
@@ -74,6 +68,8 @@ const Home: React.FC = () => {
     if (type === "file") {
       setFileModal(true);
       setFileData(rowData);
+    } else {
+      history.push(`/${rowData.name}`);
     }
   };
 
@@ -103,6 +99,7 @@ const Home: React.FC = () => {
   }, [searchText, data]);
 
   const totalCount = () => {
+    // Try with reduce and return array
     const fileCount = filteredData.filter(
       (element) => element.type === "file"
     ).length;
@@ -140,22 +137,11 @@ const Home: React.FC = () => {
           Create New File
         </Button>
       </Stack>
-      <Table style={{ marginBottom: "48px" }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Type</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {filteredData.map((row) => (
-            <TableRow onDoubleClick={() => handleDoubleClick(row)}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.type}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+
+      <FileExplorerTable
+        explorerData={filteredData}
+        handleDoubleClick={handleDoubleClick}
+      />
 
       <div>
         <Typography style={{ display: "flex", justifyContent: "right" }}>
@@ -171,6 +157,7 @@ const Home: React.FC = () => {
         handleSave={handleSave}
         handleDescriptionText={handleDescriptionText}
       />
+
       <FileModal
         fileModal={fileModal}
         handleFileModalClose={handleFileModalClose}
