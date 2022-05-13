@@ -16,7 +16,7 @@ const style = {
   left: "50%",
   transform: "translate(-50%, -50%)",
   width: 400,
-  bgcolor: "background.paper",
+  backgroundColor: "background.paper",
   border: "2px solid #CCC",
   borderRadius: "8px",
   boxShadow: 24,
@@ -32,7 +32,7 @@ interface FileExplorerProps {
   handleSave: MouseEventHandler;
 }
 
-const FileExplorerModal = ({
+const CreateModal = ({
   open,
   type,
   handleClose,
@@ -74,4 +74,4 @@ const FileExplorerModal = ({
   );
 };
 
-export default FileExplorerModal;
+export default CreateModal;

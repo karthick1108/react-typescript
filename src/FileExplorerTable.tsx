@@ -10,10 +10,11 @@ import {
 
 interface DataProps {
   explorerData: any;
-  handleDoubleClick: MouseEventHandler;
+  handleDoubleClick: Function;
 }
 
 const FileExplorerTable = ({ explorerData, handleDoubleClick }: DataProps) => {
+  // console.log("explorerData", explorerData);
   return (
     <Table style={{ marginBottom: "48px" }} aria-label="simple table">
       <TableHead>

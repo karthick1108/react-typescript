@@ -1,5 +1,6 @@
 import React, { ChangeEventHandler } from "react";
 import { Typography, Modal, Box } from "@mui/material";
+import { File } from "./Model";
 
 const style = {
   position: "absolute" as "absolute",
@@ -17,18 +18,18 @@ const style = {
 };
 
 interface FileModalProps {
-  fileModal: boolean;
+  open: boolean;
   handleFileModalClose: ChangeEventHandler;
-  fileData: any;
+  fileData: File;
 }
 
 const FileModal = ({
-  fileModal,
+  open,
   handleFileModalClose,
   fileData,
 }: FileModalProps) => {
   return (
-    <Modal open={fileModal} onClose={handleFileModalClose}>
+    <Modal open={open} onClose={handleFileModalClose}>
       <Box sx={style}>
         <Typography variant="h6" component="h2">
           {fileData.content}

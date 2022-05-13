@@ -1,75 +1,99 @@
 import React from "react";
-import { Typography, TextField, Stack, Button } from "@mui/material";
-import { useHistory } from "react-router-dom";
-import FileExplorerModal from "./Modal";
+import {
+  Typography,
+  TextField,
+  Stack,
+  Button,
+  Breadcrumbs,
+  Link,
+} from "@mui/material";
+import CreateModal from "./Modal";
 import FileModal from "./FileModal";
-import FileExplorerTable from "./Table";
+import FileExplorerTable from "./FileExplorerTable";
 
-interface Folder {
-  type: "folder";
-  name: string;
-  children: FileExplorer;
-}
-
-interface File {
-  type: "file";
-  name: string;
-  content: string;
-}
-
-type FileExplorer = Array<Folder | File>;
-
-type FileOrFolder = "file" | "folder";
+import { File, FileExplorer, FILE_OR_FOLDER, Folder } from "./Model";
 
 const Home: React.FC = () => {
-  const [open, setOpen] = React.useState(false);
-  const [modalType, setModalType] = React.useState<FileOrFolder>("file");
-  const [data, setData] = React.useState<FileExplorer>([]);
-  const [name, setName] = React.useState<string>("");
   const [searchText, setSearchText] = React.useState<string>("");
+
+  // Open Create New Modal
+  const [open, setOpen] = React.useState(false);
+  const [modalType, setModalType] = React.useState<FILE_OR_FOLDER>("file");
+  const [name, setName] = React.useState<string>("");
   const [content, setContent] = React.useState<string>("");
 
-  const [fileModal, setFileModal] = React.useState(false);
-  const [fileData, setFileData] = React.useState<FileExplorer>([]);
+  const [level, setLevel] = React.useState(1);
+  const [data, setData] = React.useState<Array<FileExplorer>>([]);
+  const [currentData, setCurrentData] = React.useState<Array<FileExplorer>>([
+    ...data,
+  ]);
+  const [path, setPath] = React.useState<Array<string>>([]);
 
-  const history = useHistory();
+  // Open File content Modal
+  const [openFileModal, setOpenFileModal] = React.useState(false);
+  const [fileData, setFileData] = React.useState<File>();
 
-  const handleOpen = (type: FileOrFolder) => {
+  const handleCreateModalOpen = (type: FILE_OR_FOLDER) => {
     setOpen(true);
     setModalType(type);
   };
-  const handleClose = () => setOpen(false);
-  const handleFileModalClose = () => setFileModal(false);
+  const handleCreateModalClose = () => setOpen(false);
+  const handleFileModalClose = () => setOpenFileModal(false);
 
   const handleSave = () => {
     let newData;
     if (modalType === "file")
-      newData = { type: "file" as "file", name, content };
-    else newData = { type: "folder" as "folder", name, children: [] };
-    setData([...data, newData]);
-    handleClose();
+      newData = { type: "file" as "file", name, content, level };
+    else newData = { type: "folder" as "folder", name, level, children: [] };
+
+    console.log("data >>>>>>", data);
+    if (data.length === 0) {
+      setData([newData]);
+    }
+    let d = getFEDataAtPath(data, path);
+    d.children = [...currentData, newData];
+    setCurrentData([...currentData, newData]);
+    setData([...data]);
+    handleCreateModalClose();
   };
 
-  const handleChangeText = (evt: any) => {
+  const getFEDataAtPath = (d: FileExplorer[], p: string[]) => {
+    let tempData: any = [...d];
+    p.forEach((p) => {
+      if (Array.isArray(tempData))
+        tempData = tempData.find((element) => element.name === p) as Folder;
+      else {
+        tempData = tempData.children.find(
+          (element: any) => element.name === p
+        ) as Folder;
+      }
+    });
+    return tempData;
+  };
+
+  const handleChangeText = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setName(evt.target.value);
   };
 
-  const handleDescriptionText = (evt: any) => {
+  const handleDescriptionText = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setContent(evt.target.value);
   };
 
-  const handleSearchText = (evt: any) => {
+  const handleSearchText = (
+    evt: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setSearchText(evt.target.value);
   };
 
-  const handleDoubleClick = (rowData: any) => {
+  const handleDoubleClick = (rowData: FileExplorer) => {
     const { type } = rowData;
 
     if (type === "file") {
-      setFileModal(true);
-      setFileData(rowData);
+      setOpenFileModal(true);
+      setFileData(rowData as File);
     } else {
-      history.push(`/${rowData.name}`);
+      rowData.children && setCurrentData([...rowData.children]);
+      setPath([...path, rowData.name]);
     }
   };
 
@@ -88,15 +112,13 @@ const Home: React.FC = () => {
 
   const filteredData = React.useMemo(() => {
     if (!searchText) {
-      return data;
+      return currentData;
     }
 
-    const newData = data.filter((item) =>
+    return currentData.filter((item) =>
       item.name.toLowerCase().includes(searchText.toLowerCase())
     );
-
-    return newData;
-  }, [searchText, data]);
+  }, [searchText, currentData]);
 
   const totalCount = () => {
     // Try with reduce and return array
@@ -110,59 +132,94 @@ const Home: React.FC = () => {
     return `${fileCount} file(s) and ${folderCount} folder(s)`;
   };
 
-  //   React.useEffect(() => {
-  //     saveLocalData();
-  //   }, [data]);
+  const navigateToFile = (selectedPath: string, index = 0) => {
+    if (selectedPath === "home") {
+      setCurrentData([...data]);
+    } else {
+      let tp = path.slice(0, index + 1);
+      setPath([...tp]);
+      let temp = [...data];
+      tp.forEach((p) => {
+        temp = (temp.find((t) => t.name === p) as Folder).children;
+      });
+      setCurrentData([...temp]);
+    }
+  };
+
+  React.useEffect(() => {
+    saveLocalData();
+  }, [data]);
+
+  // React.useEffect(() => {
+  //   getLocalData();
+  // }, []);
 
   return (
     <div>
-      <Typography style={{ textAlign: "center" }}>
-        {" "}
+      <Typography style={{ textAlign: "center", marginBottom: "16px" }}>
         Basic File Explorer
       </Typography>
       <TextField
-        style={{ marginBottom: "48px" }}
+        style={{ marginBottom: "32px" }}
         id="outlined-basic"
         label="Search ..."
         variant="outlined"
         fullWidth
         onChange={(evt) => handleSearchText(evt)}
       />
-      <Stack spacing={2} direction="row">
-        <Button variant="outlined" onClick={() => handleOpen("folder")}>
+      <Stack style={{ marginBottom: "16px" }} spacing={2} direction="row">
+        <Button
+          variant="outlined"
+          onClick={() => handleCreateModalOpen("folder")}
+        >
           Create New Folder
         </Button>
 
-        <Button variant="outlined" onClick={() => handleOpen("file")}>
+        <Button
+          variant="outlined"
+          onClick={() => handleCreateModalOpen("file")}
+        >
           Create New File
         </Button>
       </Stack>
-
+      <Breadcrumbs separator="›" aria-label="breadcrumb">
+        {[
+          <Link key="Home" onClick={() => navigateToFile("home")}>
+            Home
+          </Link>,
+          ...path.map((p, index) => {
+            return (
+              <Link key={index} onClick={() => navigateToFile(p, index)}>
+                {p}
+              </Link>
+            );
+          }),
+        ]}
+      </Breadcrumbs>
       <FileExplorerTable
         explorerData={filteredData}
         handleDoubleClick={handleDoubleClick}
       />
-
       <div>
         <Typography style={{ display: "flex", justifyContent: "right" }}>
           Total: {totalCount()}
         </Typography>
       </div>
-
-      <FileExplorerModal
+      <CreateModal
         open={open}
         type={modalType}
-        handleClose={handleClose}
+        handleClose={handleCreateModalClose}
         handleChangeText={handleChangeText}
         handleSave={handleSave}
         handleDescriptionText={handleDescriptionText}
       />
-
-      <FileModal
-        fileModal={fileModal}
-        handleFileModalClose={handleFileModalClose}
-        fileData={fileData}
-      />
+      {fileData ? (
+        <FileModal
+          open={openFileModal}
+          handleFileModalClose={handleFileModalClose}
+          fileData={fileData}
+        />
+      ) : null}
     </div>
   );
 };
