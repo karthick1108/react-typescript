@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from "react";
+import React from "react";
 
 import {
   Table,
@@ -14,7 +14,6 @@ interface DataProps {
 }
 
 const FileExplorerTable = ({ explorerData, handleDoubleClick }: DataProps) => {
-  // console.log("explorerData", explorerData);
   return (
     <Table style={{ marginBottom: "48px" }} aria-label="simple table">
       <TableHead>

@@ -56,7 +56,6 @@ const CreateModal = ({
           label={type === "file" ? "File Name" : "Folder Name"}
           variant="outlined"
           onChange={handleChangeText}
-          // TODO validation
         />
         {type === "file" ? (
           <TextareaAutosize

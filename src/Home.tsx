@@ -10,6 +10,7 @@ import {
 import CreateModal from "./Modal";
 import FileModal from "./FileModal";
 import FileExplorerTable from "./FileExplorerTable";
+import { feData } from "./initialFile";
 
 import { File, FileExplorer, FILE_OR_FOLDER, Folder } from "./Model";
 
@@ -23,7 +24,7 @@ const Home: React.FC = () => {
   const [content, setContent] = React.useState<string>("");
 
   const [level, setLevel] = React.useState(1);
-  const [data, setData] = React.useState<Array<FileExplorer>>([]);
+  const [data, setData] = React.useState<Array<FileExplorer>>(feData);
   const [currentData, setCurrentData] = React.useState<Array<FileExplorer>>([
     ...data,
   ]);
@@ -46,10 +47,6 @@ const Home: React.FC = () => {
       newData = { type: "file" as "file", name, content, level };
     else newData = { type: "folder" as "folder", name, level, children: [] };
 
-    console.log("data >>>>>>", data);
-    if (data.length === 0) {
-      setData([newData]);
-    }
     let d = getFEDataAtPath(data, path);
     d.children = [...currentData, newData];
     setCurrentData([...currentData, newData]);
@@ -95,10 +92,6 @@ const Home: React.FC = () => {
       rowData.children && setCurrentData([...rowData.children]);
       setPath([...path, rowData.name]);
     }
-  };
-
-  const saveLocalData = () => {
-    localStorage.setItem("data", JSON.stringify(data));
   };
 
   const getLocalData = () => {
@@ -147,7 +140,7 @@ const Home: React.FC = () => {
   };
 
   React.useEffect(() => {
-    saveLocalData();
+    localStorage.setItem("data", JSON.stringify(data));
   }, [data]);
 
   // React.useEffect(() => {
